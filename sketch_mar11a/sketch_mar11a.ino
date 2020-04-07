@@ -1,8 +1,12 @@
 #include <SoftwareSerial.h>
 //实例化软串口
-SoftwareSerial espSerial(0, 1); // RX, TX
+//SoftwareSerial espSerial(15, 14); // RX, TX
+#define espSerial Serial3
+const int leds[5] = {10,11,12,13};
+const int ledLength = sizeof(leds)/sizeof(leds[0]);
 int j;
 char array[100];
+String data;
 void setup() {
  
   pinMode(13, OUTPUT);
@@ -14,30 +18,27 @@ void setup() {
 int num = 0;
 void loop() {
   
-  espSerial.println("1");
+ // espSerial.println("1");
  // delay(1000);
  
   while(espSerial.available() > 0){
      Serial.write(espSerial.read());
-     Serial.print("读取软串口数据");
-     Serial.println((++num));
-     Serial.print("可用字节:");
-     Serial.println(espSerial.available());
+ 
   }
  
   j = Serial.available();
   //如果串口有数据进入的话
   if(j != 0)
   {
-    char ch = Serial.read();
-    if(ch == '0'){
-      digitalWrite(13,LOW);
-    }else if(ch == '1'){
-      digitalWrite(13,HIGH);
+    data = "";
+    while( Serial.available()>0 ){
+       data += char(Serial.read());
+       delay(100);
     }
-    Serial.write("串口接收:");
-    Serial.write(ch);
-    Serial.write("\n");
+    int index = data.indexOf("_");
+    int type = data.substring(0,index).toInt();
+    int motion = data.substring(index+1).toInt();
+     digitalWrite(leds[type], motion);
     /*for(int i = 0; i<j; i++){
       //每次读一个字符，是ASCII码的
       array[i] = Serial.read();

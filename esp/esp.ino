@@ -1,3 +1,5 @@
+//esp串口数据写入tx2 应该用Serial2
+#define espSerial Serial2
 // 电机引脚
 const int djz = 2;
 const int djf = 3;
@@ -5,35 +7,45 @@ const int leds[5] = {13,0,0,0,0};
 const int ledLength = sizeof(leds)/sizeof(leds[0]);
 int aroundSpeed = 100;
 String data;
+
 void setup() {
   pinMode(djz, OUTPUT);
   pinMode(djf, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(115200);
+  // 波特率应该跟esp发送区设置的一样大
+  espSerial.begin(9600);
+  pinMode(13, OUTPUT);
 }
 char buffer[100]; 
 void loop() {
    
-  if( Serial.available()>0 )
+  if( espSerial.available()>0 )
   {
     data = "";
-    while( Serial.available()>0 ){
-       data += char(Serial.read());
+    
+    while( espSerial.available()>0 ){
+       data += char(espSerial.read());
+       delay(10);
     }
+    Serial.println(data);
     int index = data.indexOf("_");
     String type = data.substring(0,index);
     String motion = data.substring(index+1);
+   
     executeCmd(type,motion);
   }
 }
 void executeCmd(String type,String motion){
-  if(type.compareTo("electricMachinery")){
+
+  if(type=="electricMachinery"){
      int mot = motion.toInt();
      operationElectricMachinery(mot);
-  }else if(type.compareTo("led")){
+  }else if(type=="led"){
      int index = motion.indexOf("_");
      // 获取要操作几号灯
      int ledIndex = motion.substring(0,index).toInt();
      int mot = motion.substring(index+1).toInt();
+     
      operationLED(ledIndex,mot);
   }
   
@@ -77,6 +89,7 @@ void operationElectricMachinery(int motion){
  * 控制灯
  */
 void operationLED(int ledIndex,int motion){
+   
    switch(ledIndex){
     case 0: // 0号灯
           digitalWrite(leds[ledIndex], motion);
