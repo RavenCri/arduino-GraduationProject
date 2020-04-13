@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科睿云设备</title>
+</head>
+<style>
+    .content {
+        width: 550px;
+        height: 580px;
+        margin: 110px auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding-top: 50px;
+        text-align: center;
+        border: 1px solid white;
+        color: white;
+        user-select: none;
+
+    }
+
+    .box {
+        width: 360px;
+        margin: 10px auto;
+    }
+
+    .box span {
+        font-size: 15px;
+        display: inline-block;
+        width: 100px;
+        position: relative;
+        top: 5px;
+    }
+
+    .box input {
+        width: 200px;
+        height: 25px;
+        background-color: transparent;
+        border: 0ch;
+        border-bottom: 1px solid whitesmoke;
+        font-size: 16px;
+        /* 不显示鼠标选中的框 */
+        outline: none;
+        color: honeydew;
+        padding-left: 20px;
+        display: inline-block;
+        margin-left: 5px;
+        letter-spacing: 3px;
+
+    }
+
+    .box input:focus {
+        border: solid greenyellow;
+        border-radius: 20px;
+        line-height: 16px;
+        transform: scale(1);
+    }
+
+    .bt {
+        width: 260px;
+        margin: 0 auto;
+    }
+    .bt > button{
+        padding: 10px 15px;
+        background-color: #409eff;
+        border: none;
+        font-size: 18px;
+        width: 100px;
+        outline: none;
+        border-radius: 20px;
+    }
+</style>
+
+<body style="background-image: url(./bg.jpg);height: 80%;">
+    <div class="content">
+        <form id='fm' method="post" onsubmit="return false;">
+            <div>
+                <h1>修改设备信息</h1>
+                <div class="box">
+                    <span>设备id：</span><input type="text" name='deviceId'>
+                </div>
+                <div class="box">
+                    <span>设备密码：</span><input type="text" name='devicePassword'>
+                </div>
+                <div class="box">
+                    <span>WIFI账号：</span><input type="text" name='connectSsid'>
+                </div>
+                <div class="box">
+                    <span>WIFI密码：</span><input type="password" name='connectPassword'>
+                </div>
+                <div class="box">
+                    <span>热点账号：</span><input type="text" name='mySsid'>
+                </div>
+                <div class="box">
+                    <span>热点密码：</span><input type="password" name='myPassword'>
+                </div>
+                <div class="box">
+                    <span>用户账号：</span><input type="text" name='username'>
+                </div>
+                <div class="box">
+                    <span>用户密码：</span><input type="password" name='password'>
+                </div>
+                <div class="box">
+                    <span>版本：</span><input type="text" name='version'>
+                </div>
+                <div class="box">
+                    <span>科睿服务器地址:</span><input type="text" name='publicAddress'>
+                </div>
+                <div class="bt">
+                    <button  onclick="doSubmit()">提交</button>
+                    <p style="cursor: pointer;margin-top: 20px;color: greenyellow;">Design by @科睿工作室</p>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</body>
+<script src="/index.js"></script>
+<script>
+    var data;
+    fetch('/data.json').then(res => {
+        return res.json()
+    }).then(function (myJson) {
+        data = myJson;
+        for (var item in myJson) {
+            $("input[name='" + item + "']").val(myJson[item]);
+        }
+    });
+    function doSubmit(){
+        for (var item in data) {
+            let temp = $("input[name='" + item + "']").val()
+            console.log(temp)
+            if(temp.trim() == ''){
+                alert("请检验表单是否填写完整！")
+                return;
+            }
+        }
+        var data = $("#fm").serialize()
+        console.log();
+        $.ajax({
+            url:'/update',
+            type:'post',
+            data:data,
+            success:function(res){
+                console.log(res)
+                if(res.data  == 'ok'){
+                    console.log('更新成功，请重启您的设备！')
+                }else{
+                    console.log('更新失败！')
+                }
+            },error:function(err){
+                console.log(err)
+            }
+        })
+    }
+</script>
+
+</html>

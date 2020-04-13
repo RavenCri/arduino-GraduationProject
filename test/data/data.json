@@ -1,0 +1,12 @@
+{
+    "deviceId":"0000-0000-0000-0000",
+    "devicePassword":"",
+    "version":"1.0.0",
+    "connectSsid":"",
+    "connectPassword":"",
+    "mySsid":"raven",
+    "myPassword":"123456",
+    "username":"",
+    "password":"",
+    "publicAddress":"raven"
+}
