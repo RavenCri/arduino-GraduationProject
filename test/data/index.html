@@ -145,13 +145,13 @@
             data:data,
             success:function(res){
                 console.log(res)
-                if(res.data  == 'ok'){
-                    console.log('更新成功，请重启您的设备！')
+                if(res == 'ok'){
+                    alert('更新成功，请重启您的设备！')
                 }else{
-                    console.log('更新失败！')
+                    alert('更新失败！')
                 }
             },error:function(err){
-                console.log(err)
+                alert(err)
             }
         })
     }

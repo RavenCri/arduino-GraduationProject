@@ -2,11 +2,11 @@
     "deviceId":"0000-0000-0000-0000",
     "devicePassword":"",
     "version":"1.0.0",
-    "connectSsid":"",
-    "connectPassword":"",
+    "connectSsid":"F",
+    "connectPassword":"13892393046",
     "mySsid":"raven",
-    "myPassword":"123456",
-    "username":"",
-    "password":"",
-    "publicAddress":"raven"
+    "myPassword":"12345678.",
+    "username":"test",
+    "password":"test",
+    "publicAddress":"192.168.0.104"
 }
