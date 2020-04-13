@@ -41,11 +41,12 @@ void notFound(AsyncWebServerRequest *request) {
 void setup_wifi() {
   delay(10);
   arduinoSerial.begin(9600);
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  Serial.println("开始连接WIFI：%s,密码：%s",device_jSON["ssid"],device_jSON["password"] );
+  Serial.print("开始连接 WIFI ssid：");
+  Serial.println(device_jSON["connectSsid"]);
+  Serial.print("wifi密码：");
+  Serial.println(device_jSON["connectPassword"]);
   //连接用户wifi
-  WiFi.begin(device_jSON["ssid"],device_jSON["password"] );
+  WiFi.begin(device_jSON["connectSsid"],(const char*)device_jSON["connectPassword"] );
   unsigned long startTime = millis();
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -61,19 +62,24 @@ void setup_wifi() {
   // 如果没有连接上WIFI
   if(connectFlag){
     WiFi.mode(WIFI_AP);
-    WiFi.softAP(device_jSON["myssid"],device_jSON["mypassword"]);
+    WiFi.softAP(device_jSON["mySsid"],device_jSON["myPassword"]);
     Serial.println("WIFI连接失败，请连接该设备热点重新配置您的信息。正在创建热点...");
-    Serial.println("热点名称：%s,热点密码：%s",device_jSON["myssid"],device_jSON["mypassword"]);
+    Serial.print("热点名称：");
+    Serial.println((const char*)device_jSON["mySsid"]);
+    Serial.print("热点密码：");
+    Serial.println((const char*)device_jSON["myPassword"]);
     Serial.println("WiFi Create Success!");
     Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
+    Serial.println(WiFi.softAPIP();
   }else{
     randomSeed(micros());
     Serial.println("");
     Serial.println("WiFi connected Success!");
     Serial.println("IP address: ");
     Serial.println(WiFi.localIP());
-    client.setServer(mqtt_server, mqttPort);
+    Serial.println("云服务器地址：");
+     Serial.println(device_jSON["publicAddress"]);
+    client.setServer(device_jSON["publicAddress"], mqttPort);
     client.setCallback(callback);
   }
   
@@ -133,17 +139,14 @@ void reconnect() {
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
     // 开始连接mqtt服务器
-    if (client.connect(clientId.c_str(),user,pass)) {
-      Serial.println("connected");
-      // 发布消息
-      client.publish("outTopic", "hello world");
+    if (client.connect(clientId.c_str(),(const char*)device_jSON["username"],(const char*)device_jSON["password"])) {
+      Serial.println("MQTT connected success!");
       //订阅消息
-      client.subscribe("inTopic");
+      client.subscribe(device_jSON["deviceId"]);
     } else {
-      Serial.print("failed, rc=");
+      Serial.print("MQTT connected failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
       delay(5000);
     }
   }
@@ -156,9 +159,9 @@ void init(fs::FS &fs){
      Serial.println("安装SPIFFS时发生错误...");
      return;
   }
-  File device_file = fs.open("/data.json");
+  File device_file = fs.open("/data.json",FILE_READ);
   if(!device_file || device_file.size()==0){
-    Serial.println("配置文件不存在，即将创建配置文件...");
+    Serial.println("配置文件不存在，即将创建配置文件...");  
     device_file.close();
     device_file = fs.open("/data.json", FILE_WRITE);
     if(!device_file){
