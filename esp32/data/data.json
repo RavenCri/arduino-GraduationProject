@@ -1,6 +1,6 @@
 {
     "deviceId":"0000000000000000",
-    "devicePassword":"raven",
+    "deviceKey":"raven",
     "version":"1.0.0",
     "connectSsid":"F",
     "connectPassword":"13892393046",
