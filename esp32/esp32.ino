@@ -160,8 +160,8 @@ void reconnect() {
     if(statusCode == 200){
        JSONVar req =  JSON.parse(response);
        Serial.println(JSON.stringify(req));
-       mqttUsername = req["data"]["mqtt_username"];
-       mqttPassword = req["data"]["mqtt_password"];
+       mqttUsername = req["data"]["mqttUsername"];
+       mqttPassword = req["data"]["mqttPassword"];
        if(((int)req["code"]) == 200){
          Serial.print("请求到的mqtt账号：");
          Serial.println(mqttUsername);
@@ -277,20 +277,22 @@ void loop() {
     reconnect();
   }
   mqttClient.loop();
-
+ 
   unsigned long now = millis();
+  Serial.println(now);
   if (now - lastMsg > 10000) {
     lastMsg = now;
     HttpClient httpClient = HttpClient(wifi, device_jSON["publicAddress"], port);
-    httpClient.get("/device/keepOnline?deviceId="+device_jSON["deviceId"]);
+    String deviceId = JSON.stringify(device_jSON["deviceId"]);
+    deviceId.replace("\"","");
+    httpClient.get("/device/keepOnline?deviceId="+deviceId);
+    Serial.println("发送心跳包...");
     //++value;
     //snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
     //client.publish("outTopic", msg);
     //Serial.print("Publish message: ");
-    //Serial.println(msg);
-    
-   
   }
+  delay(1000);
 }
 
 // 写入文件
