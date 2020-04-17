@@ -22,14 +22,7 @@ AsyncWebServer server(80);
 
 //后台服务器的端口
 int port = 8080;
-//const char* ssid = "F";
-//const char* password =  "13892393046";
-//const char* password =  "11111";
-//const char* myssid = "hfuu_raven";
-//const char* mypassword = "love12345";
-//const char* mqtt_server = "192.168.0.103";
-//const char* user = "raven";
-//const char* pass = "123456";
+
 const int mqttPort = 1883;
 boolean connectFlag = true;
 
@@ -43,6 +36,35 @@ int value = 0;
 JSONVar device_jSON;
 WiFiClient wifi;
 
+void setup() {
+  Serial.begin(115200);
+  //读取配置文件
+  init(SPIFFS);
+  //连接WIFI
+  setup_wifi();
+  //启动web服务器
+  startWebServer();
+}
+void loop() {
+  // 若未连接上，则一直连接WIFI
+  if (!mqttClient.connected()) {
+    reconnect();
+  }
+  mqttClient.loop();
+  unsigned long now = millis();
+  Serial.println(now);
+  if (now - lastMsg > 10000) {
+    lastMsg = now;
+    HttpClient httpClient = HttpClient(wifi, device_jSON["publicAddress"], port);
+    String deviceId = JSON.stringify(device_jSON["deviceId"]);
+    deviceId.replace("\"","");
+    httpClient.get("/device/keepOnline?deviceId="+deviceId);
+    Serial.println("发送心跳包...");
+    //snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
+    //client.publish("outTopic", msg);
+  }
+  delay(1000);
+}
 
 void notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
@@ -79,8 +101,7 @@ void setup_wifi() {
     Serial.println("WiFi Create Success!");
     Serial.println("IP address: ");
     Serial.println(WiFi.softAPIP());
-  }else{
-    
+  }else{ 
     randomSeed(micros());
     Serial.println("");
     Serial.println("WiFi connected Success!");
@@ -91,7 +112,6 @@ void setup_wifi() {
     mqttClient.setServer(device_jSON["publicAddress"], mqttPort);
     mqttClient.setCallback(callback);
   }
-  
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -99,8 +119,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print(topic);
   Serial.print("] ");
   String data = "";
-  for (int i = 0; i < length; i++) {
-    
+  for (int i = 0; i < length; i++) {    
     data += (char)payload[i];
   }
   Serial.println(data);
@@ -119,7 +138,6 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
         Serial.println(" - not a directory");
         return;
     }
-
     File file = root.openNextFile();
     while(file){
         if(file.isDirectory()){
@@ -140,7 +158,6 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
 
 
 void reconnect() {
- 
   // 如果wifi连接成功
   while (connectFlag && !mqttClient.connected()) {
     HttpClient httpClient = HttpClient(wifi, device_jSON["publicAddress"], port);
@@ -260,40 +277,7 @@ void startWebServer(){
    server.begin();
    Serial.println("web服务已启动！");
 }
-void setup() {
-  
-  Serial.begin(115200);
-  //读取配置文件
-  init(SPIFFS);
-  //连接WIFI
-  setup_wifi();
-  //启动web服务器
-  startWebServer();
-}
 
-void loop() {
-  // 若未连接上，则一直连接WIFI
-  if (!mqttClient.connected()) {
-    reconnect();
-  }
-  mqttClient.loop();
- 
-  unsigned long now = millis();
-  Serial.println(now);
-  if (now - lastMsg > 10000) {
-    lastMsg = now;
-    HttpClient httpClient = HttpClient(wifi, device_jSON["publicAddress"], port);
-    String deviceId = JSON.stringify(device_jSON["deviceId"]);
-    deviceId.replace("\"","");
-    httpClient.get("/device/keepOnline?deviceId="+deviceId);
-    Serial.println("发送心跳包...");
-    //++value;
-    //snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
-    //client.publish("outTopic", msg);
-    //Serial.print("Publish message: ");
-  }
-  delay(1000);
-}
 
 // 写入文件
 boolean writeFile(fs::FS &fs, const char * path, String message){

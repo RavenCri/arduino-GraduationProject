@@ -46,8 +46,8 @@ void init_LCD()
    oled.Lcd_String("院",96,0,0,32,GREEN); 
    oled.Lcd_String("毕设题目：",20,40,10,16,LIGHTGREEN);
    oled.Lcd_String("基于语音识别的",10,60,0,16,LGRAYBLUE);
-   oled.Lcd_String("远程",40,76,0,16,LGRAYBLUE);
-   oled.Lcd_String("控制系统设计",20,92,0,16,BROWN);
+   oled.Lcd_String("远程",50,76,0,16,LGRAYBLUE);
+   oled.Lcd_String("控制系统设计",20,95,0,16,BROWN);
    delay(3000);
    oled.LCD_Clear(WHITE);
    oled.Lcd_String("系统设计：",10,10,10,16,RED);
@@ -76,6 +76,7 @@ void reviceMsg(){
        data += char(espSerial.read());
        delay(10);
     }
+    if(data.length() == 1 &&((int)data.charAt(0)) == -1 )return;
     Serial.println(data);
     intQueue.enqueue(data);
   }
@@ -86,6 +87,7 @@ void reviceMsg(){
 void handleMsg(){
   if (!intQueue.isEmpty()) {
     String data = intQueue.dequeue();
+   
     int index = data.indexOf("_");
     String type = data.substring(0,index);
     String motion = data.substring(index+1);
