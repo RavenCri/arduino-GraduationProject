@@ -9,6 +9,12 @@ void setup()
 
 void loop()
 {
+       oled.LCD_Clear(WHITE);
+       //输出图片 起点为15,15 图片为96.这里需要写95
+       //因为 图片向左偏移15.故95+15=110
+       oled.LCD_ShowPicture(15,15,110,110);
+       delay(3000);
+       oled.LCD_Clear(WHITE);
         /**
          * 输出汉字字符串
          * 第1个参数代表要输出的字符串 
@@ -51,7 +57,7 @@ void loop()
          */
         oled.LCD_ShowString(10,110,"float:",RED); 
         oled.LCD_ShowString(70,110,s,RED);
-        delay(3000);
-        oled.LCD_Clear(WHITE);
-
+        //delay(3000);
+       
+        
 }
