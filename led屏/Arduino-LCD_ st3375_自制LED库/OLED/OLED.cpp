@@ -1,77 +1,65 @@
 #include "OLED.h"
 
-int scl=8;//定义数字接口8
-int sda=9;//定义数字接口9
-int res=10;//定义数字接口10
-int dc=11;//定义数字接口11
-int cs=12;//定义数字接口12
 
-#define OLED_SCLK_Clr() digitalWrite(scl,LOW)//SCL
-#define OLED_SCLK_Set() digitalWrite(scl,HIGH)
-
-#define OLED_SDIN_Clr() digitalWrite(sda,LOW)//SDA
-#define OLED_SDIN_Set() digitalWrite(sda,HIGH)
-
-#define OLED_RST_Clr() digitalWrite(res,LOW)//RES
-#define OLED_RST_Set() digitalWrite(res,HIGH)
-
-#define OLED_DC_Clr()  digitalWrite(dc,LOW)//DC
-#define OLED_DC_Set()  digitalWrite(dc,HIGH)
-          
-#define OLED_CS_Clr()  digitalWrite(cs,LOW)//CS
-#define OLED_CS_Set()  digitalWrite(cs,HIGH)
-
-#define USE_HORIZONTAL 1  //设置横屏或者竖屏显示 0或1为竖屏 2或3为横屏
-
-
-#if USE_HORIZONTAL==0||USE_HORIZONTAL==1
-#define LCD_W 128
-#define LCD_H 128
-
-#else
-#define LCD_W 128
-#define LCD_H 128
-#endif
-
-
-//颜色
-#define WHITE            0xFFFF
-#define BLACK            0x0000
-#define BLUE             0x001F  
-#define BRED             0XF81F
-#define GRED             0XFFE0
-#define GBLUE            0X07FF
-#define RED              0xF800
-#define MAGENTA          0xF81F
-#define GREEN            0x07E0
-#define CYAN             0x7FFF
-#define YELLOW           0xFFE0
-#define BROWN            0XBC40 //棕色
-#define BRRED            0XFC07 //棕红色
-#define GRAY             0X8430 //灰色
-//GUI颜色
-
-#define DARKBLUE         0X01CF //深蓝色
-#define LIGHTBLUE        0X7D7C //浅蓝色  
-#define GRAYBLUE         0X5458 //灰蓝色
-//以上三色为PANEL的颜色 
- 
-#define LIGHTGREEN       0X841F //浅绿色
-#define LGRAY            0XC618 //浅灰色(PANNEL),窗体背景色
-
-#define LGRAYBLUE        0XA651 //浅灰蓝色(中间层颜色)
-#define LBBLUE           0X2B12 //浅棕蓝色(选择条目的反色)
-
-short int BACK_COLOR, POINT_COLOR;
-
-
+/******************************************************************************
+      函数说明：创造对象
+      入口数据：初始化显示屏
+      返回值：  无
+******************************************************************************/
+OLED::OLED(int a,int b,int c,int d,int e){
+            this->scl = a;
+            this->sda = b;
+            this->res = c;
+            this->dc = d;
+            this->cs = e;
+            this->BACK_COLOR=WHITE;
+}
+/******************************************************************************
+      函数说明：可以输出字符串
+      入口数据：str 要打印的字符串
+                x  起始纵坐标
+                y  起始横坐标
+                space 字符间隙
+                size 字符大小 默认只支持16 或者32 可以自制字库
+                color 字体颜色
+      返回值：  无
+******************************************************************************/
+ void OLED::Lcd_String(String str,int x,int y,int space,int size,int color){
+   for(int i= 0;i<str.length();i+=3){
+     char n = str.charAt(i);
+     char m = str.charAt(i+1);
+     char o = str.charAt(i+2);
+     int index = 0;
+     String currFont;
+     if(size == 16){
+       currFont = chinese16;
+     }else
+     {
+       currFont = chinese32;
+     }
+     
+     for(int j= 0;j<currFont.length();j+=3){
+        char g = currFont.charAt(j);
+        char h = currFont.charAt(j+1);
+        char k = currFont.charAt(j+2);
+        if(n==g && m==h && o ==k){
+           
+            this->LCD_ShowChinese(x,y,index,size,color);
+            x += (size+space);
+            break;
+        }
+        index++;
+     }
+   }
+  
+ }
 
 /******************************************************************************
       函数说明：LCD串行数据写入函数
       入口数据：dat  要写入的串行数据
       返回值：  无
 ******************************************************************************/
-void LCD_Writ_Bus(uint8_t dat) 
+void OLED::LCD_Writ_Bus(uint8_t dat) 
 {  
   uint8_t i; 
   OLED_CS_Clr();
@@ -94,7 +82,7 @@ void LCD_Writ_Bus(uint8_t dat)
       入口数据：dat 写入的数据
       返回值：  无
 ******************************************************************************/
-void LCD_WR_DATA8(uint8_t dat)
+void OLED::LCD_WR_DATA8(uint8_t dat)
 {
   OLED_DC_Set();//写数据
   LCD_Writ_Bus(dat);
@@ -106,7 +94,7 @@ void LCD_WR_DATA8(uint8_t dat)
       入口数据：dat 写入的数据
       返回值：  无
 ******************************************************************************/
-void LCD_WR_DATA(short int dat)
+void OLED::LCD_WR_DATA(short int dat)
 {
   OLED_DC_Set();//写数据
   LCD_Writ_Bus(dat>>8);
@@ -119,7 +107,7 @@ void LCD_WR_DATA(short int dat)
       入口数据：dat 写入的命令
       返回值：  无
 ******************************************************************************/
-void LCD_WR_REG(uint8_t dat)
+void OLED::LCD_WR_REG(uint8_t dat)
 {
   OLED_DC_Clr();//写命令
   LCD_Writ_Bus(dat);
@@ -132,7 +120,7 @@ void LCD_WR_REG(uint8_t dat)
                 y1,y2 设置行的起始和结束地址
       返回值：  无
 ******************************************************************************/
-void LCD_Address_Set(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2)
+void OLED::LCD_Address_Set(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2)
 {
   if(USE_HORIZONTAL==0)
   {
@@ -178,7 +166,7 @@ void LCD_Address_Set(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2)
 
 
 //OLED的初始化
-void Lcd_Init(void)
+void OLED::Lcd_Init(void)
 {
   pinMode(scl,OUTPUT);//设置数字8
   pinMode(sda,OUTPUT);//设置数字9
@@ -287,7 +275,7 @@ LCD_WR_REG(0x29); //Display on
       入口数据：无
       返回值：  无
 ******************************************************************************/
-void LCD_Clear(short int Color)
+void OLED::LCD_Clear(short int Color)
 {
   short int i,j;    
   LCD_Address_Set(0,0,LCD_W-1,LCD_H-1);
@@ -309,7 +297,7 @@ void LCD_Clear(short int Color)
                 size  字号
       返回值：  无
 ******************************************************************************/
-void LCD_ShowChinese(short int x,short int y,uint8_t index,uint8_t size,short int color)
+void OLED::LCD_ShowChinese(short int x,short int y,uint8_t index,uint8_t size,short int color)
 {  
   uint8_t i,j,x1=x;
   uint8_t temp,size1;
@@ -339,7 +327,7 @@ void LCD_ShowChinese(short int x,short int y,uint8_t index,uint8_t size,short in
       入口数据：x,y   起始坐标
       返回值：  无
 ******************************************************************************/
-void LCD_DrawPoint(short int x,short int y,short int color)
+void OLED::LCD_DrawPoint(short int x,short int y,short int color)
 {
   LCD_Address_Set(x,y,x,y);//设置光标位置 
   LCD_WR_DATA(color);
@@ -351,7 +339,7 @@ void LCD_DrawPoint(short int x,short int y,short int color)
       入口数据：x,y   起始坐标
       返回值：  无
 ******************************************************************************/
-void LCD_DrawPoint_big(short int x,short int y,short int color)
+void OLED::LCD_DrawPoint_big(short int x,short int y,short int color)
 {
   LCD_Fill(x-1,y-1,x+1,y+1,color);
 } 
@@ -363,7 +351,7 @@ void LCD_DrawPoint_big(short int x,short int y,short int color)
                 xend,yend   终止坐标
       返回值：  无
 ******************************************************************************/
-void LCD_Fill(short int xsta,short int ysta,short int xend,short int yend,short int color)
+void OLED::LCD_Fill(short int xsta,short int ysta,short int xend,short int yend,short int color)
 {          
   short int i,j; 
   LCD_Address_Set(xsta,ysta,xend,yend);      //设置光标位置 
@@ -383,7 +371,7 @@ void LCD_Fill(short int xsta,short int ysta,short int xend,short int yend,short 
                 x2,y2   终止坐标
       返回值：  无
 ******************************************************************************/
-void LCD_DrawLine(short int x1,short int y1,short int x2,short int y2,short int color)
+void OLED::LCD_DrawLine(short int x1,short int y1,short int x2,short int y2,short int color)
 {
   short int t; 
   int xerr=0,yerr=0,delta_x,delta_y,distance;
@@ -425,7 +413,7 @@ void LCD_DrawLine(short int x1,short int y1,short int x2,short int y2,short int 
                 x2,y2   终止坐标
       返回值：  无
 ******************************************************************************/
-void LCD_DrawRectangle(short int x1, short int y1, short int x2, short int y2,short int color)
+void OLED::LCD_DrawRectangle(short int x1, short int y1, short int x2, short int y2,short int color)
 {
   LCD_DrawLine(x1,y1,x2,y1,color);
   LCD_DrawLine(x1,y1,x1,y2,color);
@@ -440,7 +428,7 @@ void LCD_DrawRectangle(short int x1, short int y1, short int x2, short int y2,sh
                 r       半径
       返回值：  无
 ******************************************************************************/
-void Draw_Circle(short int x0,short int y0,uint8_t r,short int color)
+void OLED::Draw_Circle(short int x0,short int y0,uint8_t r,short int color)
 {
   int a,b;
   int di;
@@ -471,7 +459,7 @@ void Draw_Circle(short int x0,short int y0,uint8_t r,short int color)
                 color  颜色
       返回值：  无
 ******************************************************************************/
-void LCD_ShowChar(short int x,short int y,uint8_t num,short int color)
+void OLED::LCD_ShowChar(short int x,short int y,uint8_t num,short int color)
 {
   uint8_t pos,t,temp;
   short int x1=x;
@@ -498,7 +486,7 @@ void LCD_ShowChar(short int x,short int y,uint8_t num,short int color)
                 *p     字符串起始地址
       返回值：  无
 ******************************************************************************/
-void LCD_ShowString(short int x,short int y,const char *p,short int color)
+void OLED::LCD_ShowString(short int x,short int y,const char *p,short int color)
 {         
     while(*p!='\0')
     {       
@@ -516,7 +504,7 @@ void LCD_ShowString(short int x,short int y,const char *p,short int color)
       入口数据：m底数，n指数
       返回值：  无
 ******************************************************************************/
-u32 mypow(uint8_t m,uint8_t n)
+u32 OLED::mypow(uint8_t m,uint8_t n)
 {
   u32 result=1;
   while(n--)result*=m;    
@@ -531,7 +519,7 @@ u32 mypow(uint8_t m,uint8_t n)
                 len    要显示的数字个数
       返回值：  无
 ******************************************************************************/
-void LCD_ShowNum(short int x,short int y,short int num,uint8_t len,short int color)
+void OLED::LCD_ShowNum(short int x,short int y,short int num,uint8_t len,short int color)
 {           
   uint8_t t,temp;
   uint8_t enshow=0;
@@ -558,7 +546,7 @@ void LCD_ShowNum(short int x,short int y,short int num,uint8_t len,short int col
                 len    要显示的数字个数
       返回值：  无
 ******************************************************************************/
-void LCD_ShowNum1(short int x,short int y,float num,uint8_t len,short int color)
+void OLED::LCD_ShowNum1(short int x,short int y,float num,uint8_t len,short int color)
 {           
   uint8_t t,temp;
   uint8_t enshow=0;
@@ -582,12 +570,14 @@ void LCD_ShowNum1(short int x,short int y,float num,uint8_t len,short int color)
       函数说明：显示40x40图片
       入口数据：x,y    起点坐标
       返回值：  无
+      //输出图片 起点为15,15 图片为96.这里需要写95
+      //因为 图片向左偏移15.故95+15=110
 ******************************************************************************/
-void LCD_ShowPicture(short int x1,short int y1,short int x2,short int y2)
+void OLED::LCD_ShowPicture(short int x1,short int y1,short int x2,short int y2)
 {
   int i,j,temp1,temp2;
   LCD_Address_Set(x1,y1,x2,y2);
-  for(i=0;i<1600;i++)
+  for(i=0;i<9000;i++)
   {
     temp1=pgm_read_byte(&image[i*2+1]);
     temp2=pgm_read_byte(&image[i*2]);
