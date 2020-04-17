@@ -1,22 +1,27 @@
 
-//实例化软串口
-//SoftwareSerial espSerial(15, 14); // RX, TX
-#define espSerial Serial3
-const int leds[5] = {10,11,12,13};
-const int ledLength = sizeof(leds)/sizeof(leds[0]);
-int j;
-char array[100];
-String data;
-#include "MD5.h"
-void setup() {
-  Serial.begin(115200);
- unsigned char* hash=MD5::make_hash("hello world");
-  //generate the digest (hex encoding) of our hash
- char *md5str = MD5::make_digest(hash, 16);
- Serial.println(md5str);
+#include <SCoop.h>
+//定义线程一
+defineTask(Task1);
+void Task1::setup()
+{
+  pinMode(13, OUTPUT);
+  //多线程的setup
 }
-int num = 0;
-void loop() {
-  
+void Task1::loop()
+{
+  digitalWrite(13, HIGH);
+  sleep(1000);
+  digitalWrite(13, LOW);
+  sleep(1000);
+  //多线程的loop
+}
  
+void setup() {
+  mySCoop.start();
 }
+void loop()
+{
+  yield();
+}
+ 
+ 
