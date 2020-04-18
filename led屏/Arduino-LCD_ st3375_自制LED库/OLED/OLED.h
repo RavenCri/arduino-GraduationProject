@@ -7,7 +7,7 @@ class OLED{
             int BACK_COLOR; 
             int POINT_COLOR;
             OLED(int a,int b,int c,int d,int e);
-            void Lcd_String(String str,int x,int y,int space,int size,int color);
+            int Lcd_String(String str,int x,int y,int space,int size,int color);
             void LCD_Writ_Bus(uint8_t dat);
             void LCD_WR_DATA8(uint8_t dat);
             void LCD_WR_DATA(short int dat);

@@ -24,12 +24,37 @@ OLED::OLED(int a,int b,int c,int d,int e){
                 color 字体颜色
       返回值：  无
 ******************************************************************************/
- void OLED::Lcd_String(String str,int x,int y,int space,int size,int color){
-   for(int i= 0;i<str.length();i+=3){
+ int OLED::Lcd_String(String str,int x,int y,int space,int size,int color){
+   int beginX = x;
+   String data = "";
+   
+   for(int i= 0;i<str.length();){
+     //是否要换行
+     if(x>128-size){
+          y += size;
+          x = beginX; 
+     }
+    // 判断是否要换下一页
+    if(y>128-size){
+          this->LCD_Clear(WHITE);
+          y = 0;
+    }
+    // 获取第一个字符
      char n = str.charAt(i);
+      // 如果是ascii码直接输出
+     if(((int)n) <=127 && ((int)n) >0){
+        data += n;
+        this->LCD_ShowString(x,y,data.c_str(),color); 
+        x+=8;
+        data = "";
+        i += 1;
+        continue;
+     }
+    // 获取第二三个字符
      char m = str.charAt(i+1);
      char o = str.charAt(i+2);
      int index = 0;
+    
      String currFont;
      if(size == 16){
        currFont = chinese16;
@@ -38,20 +63,23 @@ OLED::OLED(int a,int b,int c,int d,int e){
        currFont = chinese32;
      }
      
+   
      for(int j= 0;j<currFont.length();j+=3){
         char g = currFont.charAt(j);
         char h = currFont.charAt(j+1);
         char k = currFont.charAt(j+2);
         if(n==g && m==h && o ==k){
-           
             this->LCD_ShowChinese(x,y,index,size,color);
             x += (size+space);
             break;
         }
         index++;
      }
+     // 一定要写在这里 因为输出英文是 +1
+     i+=3;
    }
-  
+   // 输出最新可以输出的Y坐标
+   return y + size;
  }
 
 /******************************************************************************
