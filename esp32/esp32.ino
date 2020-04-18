@@ -65,17 +65,21 @@ void loop() {
   }
   delay(1000);
 }
-
+void s_print(String str){
+  str.replace("\"","");
+  Serial.println(str);
+  arduinoSerial.print(str);
+}
 void notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
 }
 void setup_wifi() {
   delay(10);
   arduinoSerial.begin(9600);
-  Serial.print("开始连接 WIFI ssid：");
-  Serial.println(device_jSON["connectSsid"]);
-  Serial.print("wifi密码：");
-  Serial.println(device_jSON["connectPassword"]);
+  s_print("开始连接 WIFI ssid：");
+  s_print(JSON.stringify(device_jSON["connectSsid"]));
+  s_print("wifi密码：");
+  s_print(JSON.stringify(device_jSON["connectPassword"]));
   //连接用户wifi
   WiFi.begin(device_jSON["connectSsid"],(const char*)device_jSON["connectPassword"] );
   unsigned long startTime = millis();
@@ -93,22 +97,22 @@ void setup_wifi() {
   if(!connectFlag){
     WiFi.mode(WIFI_AP);
     WiFi.softAP(device_jSON["mySsid"],device_jSON["myPassword"]);
-    Serial.println("WIFI连接失败，请连接该设备热点重新配置您的信息。正在创建热点...");
-    Serial.print("热点名称：");
-    Serial.println((const char*)device_jSON["mySsid"]);
-    Serial.print("热点密码：");
+    s_print("WIFI连接失败，请连接该设备热点重新配置您的信息。正在创建热点...");
+    s_print("热点名称：");
+    s_print((const char*)device_jSON["mySsid"]);
+    s_print("热点密码：");
     Serial.println((const char*)device_jSON["myPassword"]);
     Serial.println("WiFi Create Success!");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.softAPIP());
+    s_print("IP address: ");
+    s_print(getIP(WiFi.softAPIP()));
   }else{ 
     randomSeed(micros());
     Serial.println("");
-    Serial.println("WiFi connected Success!");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    Serial.print("云服务器地址：");
-    Serial.println(device_jSON["publicAddress"]);
+    s_print("WiFi connected Success!");
+    s_print("IP address: ");
+    s_print(getIP(WiFi.localIP()));
+    Serial.println("云服务器地址：");
+    Serial.println(JSON.stringify(device_jSON["publicAddress"]));
     mqttClient.setServer(device_jSON["publicAddress"], mqttPort);
     mqttClient.setCallback(callback);
   }
@@ -122,8 +126,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {    
     data += (char)payload[i];
   }
-  Serial.println(data);
-  arduinoSerial.print(data);
+  s_print(data);
 }
 
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
@@ -170,7 +173,7 @@ void reconnect() {
     String response = httpClient.responseBody();
     String mqttUsername;
     String mqttPassword;
-    Serial.print("开始请求MQTT信息...");
+    s_print("开始请求MQTT信息...");
     // 创建一个随机id
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);
@@ -185,17 +188,17 @@ void reconnect() {
          Serial.print("请求到的mqtt密码：");
          Serial.println(mqttPassword);
        }else{
-         Serial.println("请求MQTT连接信息失败，请重新配置用户账号密码");
+         s_print("请求MQTT连接失败，请重新配置用户账号密码");
          return;
        }  
     }else{
-      Serial.print("服务器请求异常，请检查路由器是否可以正常上网");
+      s_print("服务器请求异常，请检查路由器是否可以正常上网");
       return;
     }
     Serial.println("开始连接MQTT服务器...");
     // 开始连接mqtt服务器
     if (mqttClient.connect(clientId.c_str(),mqttUsername.c_str(),mqttPassword.c_str())) {
-      Serial.println("MQTT服务器连接成功!");
+      s_print("MQTT服务器连接成功!");
       //订阅消息
       String subscribe = JSON.stringify(device_jSON["deviceId"])+"-"+JSON.stringify(device_jSON["deviceKey"]);
       // 从json获取的属性带引号应该去掉！
@@ -203,8 +206,8 @@ void reconnect() {
       mqttClient.subscribe(subscribe.c_str());
       Serial.println("已成功订阅节点消息:{"+subscribe+"}");
     } else {
-      Serial.print("MQTT服务器连接失败, rc=");
-      Serial.print(mqttClient.state());
+      s_print("MQTT服务器连接失败, rc=");
+      Serial.println(""+mqttClient.state());
       Serial.println(" try again in 5 seconds");
       delay(5000);
     }
@@ -220,11 +223,11 @@ void init(fs::FS &fs){
   Serial.println("读取配置文件中...");
   File device_file = fs.open("/data.json",FILE_READ);
   if(!device_file || device_file.size()==0){
-    Serial.println("配置文件不存在，即将创建配置文件...");  
+    s_print("配置文件不存在，即将创建配置文件...");  
     device_file.close();
     device_file = fs.open("/data.json", FILE_WRITE);
     if(!device_file){
-        Serial.println("创建配置文件失败！");
+        s_print("创建配置文件失败！");
         return;
     }
     JSONVar deviceJSON;
@@ -275,7 +278,7 @@ void startWebServer(){
    });
    server.onNotFound(notFound);
    server.begin();
-   Serial.println("web服务已启动！");
+   s_print("web服务已启动！");
 }
 
 
@@ -295,4 +298,25 @@ boolean writeFile(fs::FS &fs, const char * path, String message){
         Serial.println("- frite failed");
         return false;
     }
+}
+
+  
+String getIP(IPAddress ip)//获取UDP 广播地址
+{
+    
+  int buf[4];
+ 
+  for (int i = 0; i < 4; i++)
+  {
+    buf[i] = ip[i];
+  }
+  String temp = "";
+  temp += String(ip[0]);
+  temp += '.';
+  temp += String(ip[1]);
+  temp += '.';
+  temp += String(ip[2]);
+  temp += '.';
+  temp += String(ip[3]);
+  return temp;
 }

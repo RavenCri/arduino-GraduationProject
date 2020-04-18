@@ -12,8 +12,8 @@ const int ledLength = sizeof(leds)/sizeof(leds[0]);
 //默认风扇转速
 int aroundSpeed = 100;
 //消息队列
-DataQueue<String> intQueue(10);
-DataQueue<String> handledQueue(10);
+DataQueue<String> intQueue(100);
+DataQueue<String> handledQueue(100);
 //当前显示屏显示的纵坐标
 int currY = 0;
 OLED oled(8,9,10,11,12);//scl sda res dc cs
@@ -37,8 +37,7 @@ void loop() {
            currY = 0;
            oled.LCD_Clear(WHITE);
         }
-        oled.Lcd_String("收到：",10,currY,0,16,DARKBLUE);
-        oled.LCD_ShowString(50,currY,data.c_str(),RED); 
+        oled.Lcd_String("收到："+data,10,currY,0,16,DARKBLUE);
         currY += 16;
     }
 }
@@ -56,7 +55,6 @@ void init_LCD()
    oled.Lcd_String("基于语音识别的",10,60,0,16,LGRAYBLUE);
    oled.Lcd_String("远程",50,76,0,16,LGRAYBLUE);
    oled.Lcd_String("控制系统设计",20,95,0,16,BROWN);
-   delay(3000);
    oled.LCD_Clear(WHITE);
    oled.Lcd_String("系统设计：",10,10,5,16,RED);
    oled.Lcd_String("雷文珲",20,30,0,32,LIGHTBLUE);
