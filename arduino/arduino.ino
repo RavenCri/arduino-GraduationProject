@@ -53,24 +53,24 @@ void loop() {
 }
 void init_LCD()
 {
-//   oled.Lcd_Init();
-//   oled.LCD_Clear(WHITE);
-//   oled.LCD_ShowPicture(15,15,110,110);
-//   oled.LCD_Clear(WHITE);
-//   oled.Lcd_String("合",0,0,0,32,MAGENTA);   
-//   oled.Lcd_String("肥",32,0,0,32,LIGHTBLUE);   
-//   oled.Lcd_String("学",64,0,0,32,BRRED);   
-//   oled.Lcd_String("院",96,0,0,32,GREEN); 
-//   oled.Lcd_String("毕设题目：",20,40,10,16,LIGHTGREEN);
-//   oled.Lcd_String("基于语音识别的",10,60,0,16,LGRAYBLUE);
-//   oled.Lcd_String("远程",50,76,0,16,LGRAYBLUE);
-//   oled.Lcd_String("控制系统设计",20,95,0,16,BROWN);
-//   oled.LCD_Clear(WHITE);
-//   oled.Lcd_String("系统设计：",10,10,5,16,RED);
-//   oled.Lcd_String("雷文珲",20,30,0,32,LIGHTBLUE);
-//   oled.Lcd_String("指导老师：",10,70,5,16,RED);
-//   oled.Lcd_String("谢宇",30,90,0,32,DARKBLUE);
-//   currY = 128;
+   oled.Lcd_Init();
+   oled.LCD_Clear(WHITE);
+   oled.LCD_ShowPicture(15,15,110,110);
+   oled.LCD_Clear(WHITE);
+   oled.Lcd_String("合",0,0,0,32,MAGENTA);   
+   oled.Lcd_String("肥",32,0,0,32,LIGHTBLUE);   
+   oled.Lcd_String("学",64,0,0,32,BRRED);   
+   oled.Lcd_String("院",96,0,0,32,GREEN); 
+   oled.Lcd_String("毕设题目：",20,40,10,16,LIGHTGREEN);
+   oled.Lcd_String("基于语音识别的",10,60,0,16,LGRAYBLUE);
+   oled.Lcd_String("远程",50,76,0,16,LGRAYBLUE);
+   oled.Lcd_String("控制系统设计",20,95,0,16,BROWN);
+   oled.LCD_Clear(WHITE);
+   oled.Lcd_String("系统设计：",10,10,5,16,RED);
+   oled.Lcd_String("雷文珲",20,30,0,32,LIGHTBLUE);
+   oled.Lcd_String("指导老师：",10,70,5,16,RED);
+   oled.Lcd_String("谢宇",30,90,0,32,DARKBLUE);
+   currY = 128;
    flagShow = true;
 }
 void init_IO()
