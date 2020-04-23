@@ -1,32 +1,26 @@
 #include <MsTimer2.h>     //定时器库的头文件
 #include "OLED.h"
+#include <Arduino_JSON.h>
 OLED oled(8,9,10,11,12);
 int tick = 0; //计数值
- 
-//中断服务程序
-void onTimer()
-{
-  Serial.print("timer ");
-  Serial.println(tick++);
-}
- 
+#define espSerial Serial2
+JSONVar json ;
 void setup()
 {
   Serial.begin(115200); //初始化串口
-  oled.Lcd_Init();
-  oled.LCD_Clear(WHITE);
-  //MsTimer2::set(200, onTimer); //设置中断，每1000ms进入一次中断服务程序 onTimer()
-  //MsTimer2::start(); //开始计时
+  Serial2.begin(4800);
+  json["username"] = "admin";
+  json["deviceId"] = "0000-0000-0000-0001";
+  json["deviceKey"] = "at037zf1jh28xl9t";
+  json["fromType"] = "web";
+  json["message"] = "房间温度：25°,二氧化碳浓度：25ml/L";
+  
 }
  
 void loop()
 {
-   int cuurY = oled.Lcd_String("指导lcd_sds_sd老师565语音识别123",0,10,0,16,GREEN);
-   cuurY = oled.Lcd_String("雷文珲谢宇",0,cuurY,0,32,GREEN);
-    oled.Lcd_String("雷文珲谢宇",0,cuurY,0,32,GREEN);
-   //oled.LCD_ShowString(22,50,"lcd_0_1abAfFD",RED); 
-   //oled.LCD_ShowPicture(15,15,110,110);
-   delay(3000);
-   oled.LCD_Clear(WHITE);
+   
+   Serial2.print(JSON.stringify(json));
+   delay(2000);
    
 }
