@@ -16,7 +16,7 @@ extern PubSubClient mqttClient;
 extern boolean connectFlag;
 void setup() {
   Serial.begin(115200);
-  arduinoSerial.begin(4800);
+  arduinoSerial.begin(19200);
   //读取配置文件
   fileService.init();
   //初始化WIFI

@@ -9,8 +9,8 @@ void MqttService::connectServer(){
   
   mqttClient.setServer(device_jSON["publicAddress"], 1883);
   mqttClient.setCallback(callback);
-   // 如果wifi连接成功
-  while (connectFlag && !mqttClient.connected()) {
+   // 如果wifi连接成功且mqtt未连接
+  if (connectFlag && !mqttClient.connected()) {
    
     String username = JSON.stringify(device_jSON["username"]);
     String password = JSON.stringify(device_jSON["password"]);
@@ -51,9 +51,7 @@ void MqttService::connectServer(){
       mqttClient.subscribe(subscribe.c_str());
       Serial.println("已成功订阅节点消息:{"+subscribe+"}");
     } else {
-      common.s_print("mqtt服务器连接失败, rc=");
-      Serial.println(""+mqttClient.state());
-      Serial.println(" try again in 5 seconds");
+      common.s_print("mqtt服务器连接失败");
       delay(5000);
     }
   }

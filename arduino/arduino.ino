@@ -26,7 +26,7 @@ OLED oled(8,9,10,11,12);//scl sda res dc cs
 void setup() {
   Serial.begin(115200);
   // 波特率应该跟esp发送区设置的一样大
-  espSerial.begin(4800);
+  espSerial.begin(19200);
   init_Interrupt();
   //初始化IO口
   init_IO();
@@ -112,7 +112,7 @@ void reviceMsg(){
        Serial.print(c);
        data += c;  
        if(((int)c) == -1)return;
-       delay(20);
+       
     }
 
     Serial.println(("收到esp："+data));
@@ -134,7 +134,7 @@ void handleMsg(){
     JSONVar json_data = JSON.parse(data);
     String  code = (const char *)json_data["code"];
     String  platForm = (const char *)json_data["platForm"];
-    handledQueue.enqueue(data);
+    handledQueue.enqueue(code);
     int index = code.indexOf("_");
     String type = code.substring(0,index);
     String motion = code.substring(index+1);
