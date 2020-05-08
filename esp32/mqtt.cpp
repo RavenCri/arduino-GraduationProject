@@ -11,14 +11,15 @@ void MqttService::connectServer(){
   mqttClient.setCallback(callback);
    // 如果wifi连接成功且mqtt未连接
   if (connectFlag && !mqttClient.connected()) {
-   
+    Serial.println("开始请求mqtt信息...");
     String username = JSON.stringify(device_jSON["username"]);
     String password = JSON.stringify(device_jSON["password"]);
     String postData = "username="+username+"&password="+password;
+    
     String response = httpService.postRequest("/mqtt/getMqttInfo",postData);
     String mqttUsername;
     String mqttPassword;
-    Serial.println("开始请求mqtt信息...");
+
     // 创建一个随机id
     String clientId = "ESP8266Client-";
     clientId += String(random(0xffff), HEX);

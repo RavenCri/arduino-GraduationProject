@@ -31,7 +31,7 @@ void HttpService::startWebServer(){
 String HttpService::postRequest(String url,String postData){
   String contentType = "application/x-www-form-urlencoded";
    WiFiClient espClient;
-   HttpClient httpClient = HttpClient(espClient, device_jSON["publicAddress"], 8080);
+   HttpClient httpClient = HttpClient(espClient,device_jSON["publicAddress"], 5500);
    httpClient.post(url, contentType, postData);
    int statusCode = httpClient.responseStatusCode();
    String response = httpClient.responseBody();
@@ -46,11 +46,13 @@ String HttpService::postRequest(String url,String postData){
 void HttpService::heartPackage(){
  
     WiFiClient wifi;
-    HttpClient httpClient = HttpClient(wifi, device_jSON["publicAddress"], 8080);
+    HttpClient httpClient = HttpClient(wifi, device_jSON["publicAddress"], 5500);
     String deviceId = JSON.stringify(device_jSON["deviceId"]);
     deviceId.replace("\"","");
     httpClient.get("/device/keepOnline?deviceId="+deviceId);
-    Serial.println("发送心跳包...");
+    Serial.print("发送心跳包...ResponseCode:");
+    //必须加个响应阻塞一下 要不然直接就跳过了
+    Serial.println(httpClient.responseStatusCode());
     //client.publish("outTopic", msg);
  
 }  
