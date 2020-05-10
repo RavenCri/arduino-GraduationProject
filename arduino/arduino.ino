@@ -2,7 +2,7 @@
 
 #include "OLED.h"
 #include "Queue.h"
-
+#include <dhtnew.h>
 #include <MsTimer2.h>     //定时器库的头文件
 //esp串口数据写入tx2 应该用Serial2
 #define espSerial Serial2
@@ -21,6 +21,8 @@ DataQueue<String> handledQueue(200);
 int currY = 0;
 boolean flagShow = false;
 
+
+DHTNEW mySensor(2);
 OLED oled(8,9,10,11,12);//scl sda res dc cs
 
 void setup() {
@@ -81,6 +83,8 @@ void init_IO()
     if(leds[i] !=0)
       pinMode(leds[i], OUTPUT);
   }
+  mySensor.setHumOffset(10);
+  mySensor.setTempOffset(-1.5);
 }
 void init_Interrupt(){
   MsTimer2::set(200, onTimer); //设置中断，每1000ms进入一次中断服务程序 onTimer()
@@ -217,6 +221,9 @@ void operationLED(int ledIndex,int motion){
 void operationMeasure(String platForm){
   JSONVar send;
   send["platForm"] = platForm;
-  send["msg"] = "房间温度：25°,二氧化碳浓度：25ml/L";
+  mySensor.read();
+  char s[100];
+  sprintf(s,"房间温度：%.2f,室内湿度：%.2f",mySensor.getTemperature(),mySensor.getHumidity());
+  send["msg"] = (String)s;
   espSerial.print(JSON.stringify(send));
 }
