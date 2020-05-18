@@ -10,7 +10,7 @@
 // 电机引脚
 const int djz = 2;
 const int djf = 3;
-const int leds[5] = {22,24,26,28,30};
+const int leds[4] = {13,2,3,4};
 const int ledLength = sizeof(leds)/sizeof(leds[0]);
 //默认风扇转速
 int aroundSpeed = 100;
@@ -221,6 +221,7 @@ void operationLED(int ledIndex,int motion){
           break;
     case 99: //操作所有灯
          for(int i = 0; i<ledLength; i++){
+            Serial.println(i);
             digitalWrite(leds[i], motion);
             delay(10);
          }

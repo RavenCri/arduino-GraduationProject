@@ -28,11 +28,12 @@ void loop() {
   // 检测是否连接上MQTT服务器
   if (!mqttClient.connected()) {
     mqttService.connectServer();
-    httpService.heartPackage();
+    
   }
   mqttClient.loop();
   unsigned long now = millis();
   if (connectFlag ) {
+    httpService.heartPackage();
     if(now - lastMills > 10000){
       lastMills = now;
       httpService.heartPackage();
