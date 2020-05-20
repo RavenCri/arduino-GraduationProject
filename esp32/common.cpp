@@ -2,7 +2,7 @@
 
 void Common::s_print(String str){
   Serial.println(str);
-  arduinoSerial.print("@"+str+"$");
+  arduinoSerial.print(str);
 }
 String Common::getPostData(JSONVar data){
     String res = "";

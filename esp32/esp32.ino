@@ -15,14 +15,18 @@ int lastMills = 0;
 extern PubSubClient mqttClient;
 extern boolean connectFlag;
 void setup() {
+  
   Serial.begin(115200);
-  arduinoSerial.begin(19200);
+  arduinoSerial.begin(38400,SERIAL_8N2);
+  delay(10000);
   //读取配置文件
   fileService.init();
   //初始化WIFI
   wifiService.setup_wifi();
+  delay(200);
   //启动web服务器
   httpService.startWebServer();
+  delay(200);
 }
 void loop() {
   // 检测是否连接上MQTT服务器

@@ -45,6 +45,7 @@ void MqttService::connectServer(){
     if (mqttClient.connect(clientId.c_str(),mqttUsername.c_str(),mqttPassword.c_str())) {
       common.s_print("mqtt服务器连接成功!");
       delay(200);
+      common.s_print("all finish");
       //订阅消息
       String subscribe = JSON.stringify(device_jSON["deviceId"])+"-"+JSON.stringify(device_jSON["deviceKey"]);
       // 从json获取的属性带引号应该去掉！

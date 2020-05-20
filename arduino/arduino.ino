@@ -8,54 +8,57 @@
 #define espSerial Serial2
 
 // 电机引脚
-const int djz = 2;
-const int djf = 3;
-const int leds[4] = {13,2,3,4};
+const int djz = 7;
+const int djf = 8;
+const int leds[4] = {3,4,5,6};
 const int ledLength = sizeof(leds)/sizeof(leds[0]);
 //默认风扇转速
 int aroundSpeed = 100;
 //消息队列
-DataQueue<String> intQueue(200);
-DataQueue<String> handledQueue(200);
+DataQueue<String> intQueue(20);
+DataQueue<String> handledQueue(20);
 //当前显示屏显示的纵坐标
 int currY = 0;
-boolean flagShow = false;
-
-
 DHTNEW mySensor(2);
-OLED oled(8,9,10,11,12);//scl sda res dc cs
+OLED oled(22,24,26,28,30);//scl sda res dc cs
 
 void setup() {
+  
   Serial.begin(115200);
   // 波特率应该跟esp发送区设置的一样大
-  espSerial.begin(19200);
+  espSerial.begin(38400,SERIAL_8N2);
+  espSerial.flush();
   init_Interrupt();
+
+  oled.Lcd_Init();
+  Serial.println("初始化完毕");
+  oled.LCD_Clear(WHITE);
+  currY = oled.Lcd_String("正在初始化中...",20,15,0,16,BROWN);
+  
   //初始化IO口
   init_IO();
-  
 
 }
 void loop() {
-  //初始化显示屏
-  if(!flagShow){
-    init_LCD();
-  }else{
+  
     if (!handledQueue.isEmpty()) {
      String data = handledQueue.dequeue();
-    
+       //初始化显示屏
+      if(data == "all finish"){
+        init_LCD();
+        return;
+      }
      Serial.println("要显示->"+data);
      if(currY >=128){
            currY = 0;
            oled.LCD_Clear(WHITE);
         }   
-     currY= oled.Lcd_String("收到："+data,10,currY,0,16,DARKBLUE);
+     currY= oled.Lcd_String("收到："+data,5,currY,0,16,DARKBLUE);
     }
-  }
-  
 }
 void init_LCD()
 {
-   oled.Lcd_Init();
+   
    oled.LCD_Clear(WHITE);
    oled.LCD_ShowPicture(15,15,110,110);
    oled.LCD_Clear(WHITE);
@@ -73,10 +76,10 @@ void init_LCD()
    oled.Lcd_String("指导老师：",10,70,5,16,RED);
    oled.Lcd_String("谢宇",30,90,0,32,DARKBLUE);
    currY = 128;
-   flagShow = true;
 }
 void init_IO()
 {
+
   pinMode(djz, OUTPUT);
   pinMode(djf, OUTPUT);
   for(int i = 0; i< ledLength; i++){
@@ -87,7 +90,7 @@ void init_IO()
   mySensor.setTempOffset(-1.5);
 }
 void init_Interrupt(){
-  MsTimer2::set(200, onTimer); //设置中断，每1000ms进入一次中断服务程序 onTimer()
+  MsTimer2::set(200, onTimer); //设置中断，每200ms进入一次中断服务程序 onTimer()
   MsTimer2::start(); //开始计时
 }
 //中断服务程序
@@ -104,21 +107,27 @@ void onTimer()
 
 
 void reviceMsg(){
+ 
   String data = "";
   if( espSerial.available()>0 ){
-    delay(200);
+    delay(20);
+//    char c;
+//    c = espSerial.read();
+//     Serial.println("进来");
+//    if(c != '@'){
+//      return;  
+//    }
+//    while( (c = espSerial.read()) !='$' ){
+//       Serial.print(c);
+//       data += c;  
+//       if(((int)c) == -1)return;
+//       
+//    }
     char c;
-    c = espSerial.read();
-    if(c != '@'){
-      return;  
-    }
-    while( (c = espSerial.read()) !='$' ){
-       Serial.print(c);
-       data += c;  
-       if(((int)c) == -1)return;
-       
-    }
+    while( (c = espSerial.read()) !=-1 ){
 
+      data += c;
+    }
     Serial.println(("收到esp："+data));
     intQueue.enqueue(data);
   
@@ -136,6 +145,11 @@ void handleMsg(){
   if (!intQueue.isEmpty()) {
     String data = intQueue.dequeue();
     JSONVar json_data = JSON.parse(data);
+    if (JSON.typeof(json_data) == "undefined") {
+     
+      handledQueue.enqueue(data);
+      return;
+    }
     String  code = (const char *)json_data["code"];
     String  platForm = (const char *)json_data["platForm"];
     handledQueue.enqueue(code);
@@ -234,6 +248,7 @@ void operationMeasure(String platForm){
   mySensor.read();
   char s[100];
   sprintf(s,"房间温度：%.2f,室内湿度：%.2f",mySensor.getTemperature(),mySensor.getHumidity());
+  Serial.println(mySensor.getTemperature());
   send["msg"] = (String)s;
   espSerial.print(JSON.stringify(send));
 }

@@ -34,14 +34,18 @@ void WifiService::setup_wifi() {
 void WifiService::createWiFiAP(){
     WiFi.mode(WIFI_AP);
     WiFi.softAP(device_jSON["mySsid"],device_jSON["myPassword"]);
-    common.s_print("WIFI连接失败，请连接该设备热点重新配置您的信息。正在创建热点...");
+    common.s_print("WIFI连接失败，请重新配置您的信息");
+    delay(500);
+    char wifi_id[100];
+    sprintf(wifi_id,"热点名称：%s",(const char*)device_jSON["mySsid"]);
+    //common.s_print((const char*)device_jSON["mySsid"]);
     delay(200);
-    common.s_print("热点名称：");
+    common.s_print(wifi_id);
+    char password[100];
+    sprintf(password,"热点密码：%s",(const char*)device_jSON["myPassword"]);
     delay(200);
-    common.s_print((const char*)device_jSON["mySsid"]);
-    common.s_print("热点密码：");
-    delay(200);
-    Serial.println((const char*)device_jSON["myPassword"]);
+    common.s_print(password);
     Serial.println("WiFi Create Success!");
+    delay(200);
     common.s_print("设备IP："+common.getIP(WiFi.softAPIP()));
 }
