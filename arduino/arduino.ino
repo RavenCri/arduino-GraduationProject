@@ -10,6 +10,7 @@
 // 电机引脚
 const int djz = 7;
 const int djf = 8;
+const int inroom = 2;
 const int leds[4] = {3,4,5,6};
 const int ledLength = sizeof(leds)/sizeof(leds[0]);
 //默认风扇转速
@@ -19,7 +20,7 @@ DataQueue<String> intQueue(20);
 DataQueue<String> handledQueue(20);
 //当前显示屏显示的纵坐标
 int currY = 0;
-DHTNEW mySensor(2);
+const DHTNEW mySensor(inroom);
 OLED oled(22,24,26,28,30);//scl sda res dc cs
 
 void setup() {
@@ -27,17 +28,20 @@ void setup() {
   Serial.begin(115200);
   // 波特率应该跟esp发送区设置的一样大
   espSerial.begin(38400,SERIAL_8N2);
-  espSerial.flush();
-  init_Interrupt();
-
-  oled.Lcd_Init();
-  Serial.println("初始化完毕");
-  oled.LCD_Clear(WHITE);
-  currY = oled.Lcd_String("正在初始化中...",20,15,0,16,BROWN);
   
+  init_Interrupt();
   //初始化IO口
   init_IO();
+  // 初始化屏幕显示
+  init_screen();
+  Serial.println("初始化完毕");
+  
+}
 
+void init_screen(){
+    oled.Lcd_Init();
+    oled.LCD_Clear(WHITE);
+    currY = oled.Lcd_String("正在初始化中...",20,15,0,16,BROWN);
 }
 void loop() {
   
@@ -55,6 +59,8 @@ void loop() {
         }   
      currY= oled.Lcd_String("收到："+data,5,currY,0,16,DARKBLUE);
     }
+    // 湿度传感器
+     mySensor.read();
 }
 void init_LCD()
 {
@@ -79,7 +85,6 @@ void init_LCD()
 }
 void init_IO()
 {
-
   pinMode(djz, OUTPUT);
   pinMode(djf, OUTPUT);
   for(int i = 0; i< ledLength; i++){
@@ -100,6 +105,7 @@ void onTimer()
   reviceMsg();
   //处理消息
   handleMsg(); 
+ 
 }
 /*'
  * 接收消息
@@ -174,6 +180,7 @@ void executeCmd(String type,String motion,String platForm){
      int mot = motion.substring(index+1).toInt();
      operationLED(ledIndex,mot);
   }else if(type == "measure"){//测量家居信号
+     
      operationMeasure(platForm);
   }
 }
@@ -245,10 +252,21 @@ void operationLED(int ledIndex,int motion){
 void operationMeasure(String platForm){
   JSONVar send;
   send["platForm"] = platForm;
-  mySensor.read();
+  
+ 
+  Serial.print(mySensor.getHumidity(), 1);
+  Serial.print("\t");
+  Serial.println(mySensor.getTemperature(), 1);
+  //mySensor.getTemperature()
+  //mySensor.getHumidity()
   char s[100];
-  sprintf(s,"房间温度：%.2f,室内湿度：%.2f",mySensor.getTemperature(),mySensor.getHumidity());
-  Serial.println(mySensor.getTemperature());
+  char temperature[6];
+  char humidity[6];
+  dtostrf(mySensor.getTemperature(), 4, 2, temperature);
+  dtostrf(mySensor.getHumidity(), 4, 2, humidity);
+  sprintf(s,"房间温度：%s°,室内湿度：%sRH",temperature,humidity);
+ // sprintf(s,"房间温度：%.2f,室内湿度：%.2f",mySensor.getTemperature(),mySensor.getHumidity());
   send["msg"] = (String)s;
   espSerial.print(JSON.stringify(send));
+ 
 }
