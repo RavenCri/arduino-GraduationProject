@@ -37,7 +37,7 @@ void MqttService::connectServer(){
          return;
        }  
     }else{
-      common.s_print("服务器请求异常，请检查路由器是否可以正常上网");
+      common.s_print("服务器请求异常，请检查路由器是否可以正常通信");
       return;
     }
     Serial.println("开始连接mqtt服务器...");

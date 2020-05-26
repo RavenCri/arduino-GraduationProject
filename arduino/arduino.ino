@@ -22,7 +22,7 @@ DataQueue<String> handledQueue(20);
 int currY = 0;
 const DHTNEW mySensor(inroom);
 OLED oled(22,24,26,28,30);//scl sda res dc cs
-
+boolean bengdi = false;
 void setup() {
   
   Serial.begin(115200);
@@ -61,6 +61,18 @@ void loop() {
     }
     // 湿度传感器
      mySensor.read();
+     if(bengdi){
+      for(int i = 0; i<100; i++){
+           for(int j = 0; j<ledLength; j++){
+              //Serial.println(i);
+              digitalWrite(leds[j], 1);
+              delay(80);
+              digitalWrite(leds[j], 0);
+              delay(20);
+            } 
+         }
+       bengdi = false;
+     }
 }
 void init_LCD()
 {
@@ -194,12 +206,12 @@ void operationElectricMachinery(int motion){
          digitalWrite(djf, HIGH);
           break;
     case 1: // 正向转动
-          digitalWrite(djz,aroundSpeed );
+          digitalWrite(djz,LOW );
           digitalWrite(djf, HIGH);
           break;
     case 2:// 反向转动
           digitalWrite(djz, HIGH);
-          digitalWrite(djf, aroundSpeed);
+          digitalWrite(djf, LOW);
           break;
     case 3: //加速转动
           aroundSpeed += 50;
@@ -246,6 +258,9 @@ void operationLED(int ledIndex,int motion){
             digitalWrite(leds[i], motion);
             delay(10);
          }
+          break;
+    case 100: // 蹦迪
+          bengdi = true;
           break;
   }
 }
